@@ -1,0 +1,1 @@
+New-NetFirewallRule -DisplayName "WOL Listener" -Direction Inbound -Protocol UDP -LocalPort 7,9 -Action Allow

@@ -1,0 +1,1 @@
+New-NetFirewallRule -DisplayName "Suspend Listener" -Direction Inbound -Protocol TCP -LocalPort 5900 -Action Allow
