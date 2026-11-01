@@ -45,6 +45,79 @@ After that, you should install a GPU accelerated remote desktop app / game strea
 8. Download a GPU based remote desktop / game streaming tool as well as a virtual display adapter driver (not included) to take full advantage of the GPU accelerated desktop.  The issues tab of this repo has lots of good ideas and advice about how to get the best out of your new VM.
 9. You should be good to go!
 
+### Latest updates
+
+- `Update-VMGpuPartitionDriver.ps1` now handles Windows 11 24H2 hosts where a mounted VM disk has no drive letter: it tries to assign one, stops safely if that fails, and checks whether driver files were copied.
+- `Add-VMGpuPartitionAdapterFiles.psm1` validates the destination drive letter before copying and reports driver-copy progress.
+- The parameter values in `CopyFilesToVM.ps1` are machine-specific; review and set the VM name, ISO path, storage, memory, CPU, and GPU values for your own host before running it.
+- `Fix-VMGpuPartitionAllocation.ps1` is available for VMs with GPU-PV allocation problems (for example, GPU workloads crashing during startup). See below before running it: it may forcibly stop a running VM.
+- Optional WOL and suspend listeners can wake a VM from the LAN and suspend/save it when a remote gaming session ends. Setup instructions follow.
+
+### Fixing GPU partition allocation
+
+If a VM has GPU-PV allocation problems, run this from an elevated PowerShell on the Hyper-V host, from the extracted repository folder:
+
+```powershell
+.\Fix-VMGpuPartitionAllocation.ps1 -VMName "YourVMName"
+```
+
+The VM must be off while its allocation is changed. If it is running, the script force-stops it and starts it again after applying the fix; save any guest work first. A VM that was already off remains off unless you add `-StartAfter`. The script also disables VM checkpoints, which are incompatible with GPU-PV.
+
+### Optional: Wake-on-LAN and automatic suspend
+
+The scripts in `WOL listener` run on the Hyper-V host. The WOL listener receives standard magic packets on UDP ports 7 and 9, matches the packet's target MAC address to a VM network adapter, and starts an Off or Saved VM (or resumes a Paused VM). The suspend listener accepts a request from a script in the guest and suspends or saves the configured VM.
+
+#### Install the host listeners
+
+1. Keep the extracted repository in a permanent local folder on the host. The scheduled tasks run as `SYSTEM` at startup, so do not put the scripts in a location that account cannot read.
+2. Open **Windows PowerShell as Administrator** and change to the listener folder:
+
+   ```powershell
+   Set-Location "C:\path\to\Easy-GPU-PV\WOL listener"
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+   ```
+
+   The execution-policy change applies only to this PowerShell window.
+3. If you want WOL, install its inbound firewall rule:
+
+   ```powershell
+   .\open_firewall_rule.ps1
+   ```
+
+4. To enable automatic suspend as well, first configure the shared secret and VM in `suspend-listener.ps1` (see below), then install its firewall rule:
+
+   ```powershell
+   .\open_firewall_rule_suspend_listener.ps1
+   ```
+
+   TCP port 5900 is used by default. Keep it limited to a trusted LAN; do not port-forward it to the internet.
+5. Register both startup tasks:
+
+   ```powershell
+   .\register_scheduledtask.ps1
+   ```
+
+   This creates `HyperV-WOL-Listener` and `HyperV-Suspend-Listener`, which run as `SYSTEM` at startup. The task script now resolves listener paths relative to its own location, so the repository does not need to be installed at a particular path. Restart the host, or start the tasks from **Task Scheduler** to begin listening.
+
+#### Send a wake packet
+
+Find the VM adapter's MAC address on the host:
+
+```powershell
+Get-VMNetworkAdapter -VMName "YourVMName" | Select-Object VMName, Name, MacAddress
+```
+
+Configure your WOL app/device to send a standard magic packet to that MAC address on the host's LAN, using UDP port 7 or 9. The listener checks the virtual NIC MAC addresses of all VMs, so the packet can wake a matching VM even though that VM is off. Check `WOL listener\wol-listener.log` on the host if it does not wake.
+
+#### Suspend the VM when a Sunshine session ends (optional)
+
+1. On the host, edit the parameters near the top of `suspend-listener.ps1`: set `VMName` to the guest VM, choose a long, unique `Secret` instead of the default `changeme-shared-secret`, and select `Mode` as `Suspend` or `Save`. The default port is 5900.
+2. Copy `suspend-trigger.ps1` into the guest. Edit its `HostIP` to the Hyper-V host's LAN IP and set `Secret` to exactly the same value as on the host. Keep the port the same on both scripts.
+3. In Sunshine's application configuration, set this guest-side script to run as an **undo** prep command when the session disconnects. The guest script sends the request; the host listener performs the Hyper-V suspend/save operation.
+4. Restart the `HyperV-Suspend-Listener` task (or restart the host) after changing the host listener parameters. Review `WOL listener\suspend-listener.log` on the host if requests are not handled.
+
+The suspend listener uses a plain-text shared secret over TCP, not encrypted authentication. Use a unique secret and a trusted private network only. The firewall rule opens the selected port for inbound connections; restrict its scope in Windows Firewall if your network requires it.
+
 ### Upgrading GPU Drivers when you update the host GPU Drivers
 It's important to update the VM GPU Drivers after you have updated the Host GPUs drivers. You can do this by...  
 1. Reboot the host after updating GPU Drivers.  
