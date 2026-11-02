@@ -145,7 +145,7 @@ It's important to update the VM GPU Drivers after you have updated the Host GPUs
 - AMD Polaris GPUS like the RX 580 do not support hardware video encoding via GPU Paravirtualization at this time.  
 - To download Windows ISOs with Rufus, it must have "Check for updates" enabled.
 
-#James message
+# James message
 James, the original developr of Easy-GPU-PV is continuing development of [App Sandbox](https://github.com/jamesstringer90/appsandbox)  
 
 I have left James original message here to respect his work.
