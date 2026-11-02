@@ -1,16 +1,3 @@
-# ANNOUNCEMENT:  
-Easy GPU PV will be replaced with [App Sandbox](https://github.com/jamesstringer90/appsandbox)  
-
-Compared to Easy-GPU-PV, App Sandbox is 100x easier to use: It's a full Windows app with a friendly user interface, it also removes the need for Hyper-V, so people on Win11 Home can use it.  
-
-App Sandbox includes everything you need to create a VM, just bring your Windows 11 or Ubuntu 26.04LTS ISO and it will setup everything for you including GPU support on both Windows and Ubuntu.  You can install apps like Sunshine if you want to, but it's not a requirement.
-
-It's also fully open source with an MIT license  
-
-[Download it here](https://github.com/jamesstringer90/appsandbox/releases/download/v0.1.0/AppSandbox-0.1.0-x64.zip)
-
-<img width="1028" height="446" alt="image" src="https://github.com/user-attachments/assets/2b341bb3-e2de-456b-b8e8-a0b037099b62" />
-
 # Easy-GPU-PV
 A work-in-progress project dedicated to making GPU Paravirtualization on Windows Hyper-V easier!  
 
@@ -157,3 +144,20 @@ It's important to update the VM GPU Drivers after you have updated the Host GPUs
 - If you do not have administrator permissions on the machine it means you set the username and vmname to the same thing, these needs to be different.  
 - AMD Polaris GPUS like the RX 580 do not support hardware video encoding via GPU Paravirtualization at this time.  
 - To download Windows ISOs with Rufus, it must have "Check for updates" enabled.
+
+#James message
+James, the original developr of Easy-GPU-PV is continuing development of [App Sandbox](https://github.com/jamesstringer90/appsandbox)  
+
+I have left James original message here to respect his work.
+
+"""
+Compared to Easy-GPU-PV, App Sandbox is 100x easier to use: It's a full Windows app with a friendly user interface, it also removes the need for Hyper-V, so people on Win11 Home can use it.  
+
+App Sandbox includes everything you need to create a VM, just bring your Windows 11 or Ubuntu 26.04LTS ISO and it will setup everything for you including GPU support on both Windows and Ubuntu.  You can install apps like Sunshine if you want to, but it's not a requirement.
+
+It's also fully open source with an MIT license  
+
+[Download it here](https://github.com/jamesstringer90/appsandbox/releases/download/v0.1.0/AppSandbox-0.1.0-x64.zip)
+
+<img width="1028" height="446" alt="image" src="https://github.com/user-attachments/assets/2b341bb3-e2de-456b-b8e8-a0b037099b62" />
+"""
